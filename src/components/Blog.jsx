@@ -1,17 +1,56 @@
-import { useState } from "react";
+import { collection, doc, getDocs } from "firebase/firestore";
+import { useEffect, useRef, useState } from "react";
+import { fireStore } from "../config/firebase";
 
 const Blog = () => {
     
     const [formData, setFormData] = useState({title:"", desc:""})
     const [blog, setBlog] = useState([])
 
-    const BlogSubmit = (e) => {
-        e.preventDefault();
+    const titleRef = useRef()
 
-        setBlog([{title: formData.title,desc: formData.desc}, ...blog]);
-        setFormData({title:"", desc:""});
-        console.log(blog);
-    }
+    useEffect(() => {
+        if (titleRef.current) {
+            titleRef.current.focus();
+        }
+    }, []); 
+
+
+    useEffect(() => {
+        async function fetchData() {
+            try {
+                const snapshot = await getDocs(collection(fireStore, "blog data"));
+                console.log(snapshot);
+    
+                const blogData = snapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+    
+                console.log(blogData);
+                setBlog(blogData);
+            } catch (error) {
+
+                console.error("Error fetching blog data:", error);
+            }
+        }
+    
+        fetchData();
+    }, []);
+
+// use for blog data storing direct from useState //
+   async function BlogSubmit(e) {
+        e.preventDefault();
+        // titleRef.current.focus();
+
+        // setBlog([{title: formData.title,desc: formData.desc}, ...blog]);
+        // setFormData({title:"", desc:""});
+        // console.log(blog);
+
+        const docRef = doc(collection(fireStore, "blog data"))
+        console.log(docRef);
+        
+   }  
     return(
         <>
         <div className="container-fluid">
